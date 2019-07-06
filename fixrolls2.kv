@@ -1,0 +1,409 @@
+
+#:import MDSeparator kivymd.cards.MDSeparator
+#:import MDToolbar kivymd.toolbar.MDToolbar
+
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
+
+#:import MDBottomNavigation kivymd.bottomnavigation.MDBottomNavigation
+
+#:import MDLabel kivymd.label.MDLabel
+
+#:import MDFillRoundFlatIconButton kivymd.button.MDFillRoundFlatButton
+#:import MDRaisedButton kivymd.button.MDRaisedButton
+#:import MDRectangleFlatButton kivymd.button.MDRectangleFlatButton
+#:import MDTextButton kivymd.button.MDTextButton
+
+#:import Button kivy.uix.button.Button
+#:import MDTextField kivymd.textfields.MDTextField
+
+
+<StartScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        AsyncImage:
+            source: 'images/logo-fix-1000.png'
+        BoxLayout:
+            orientation: 'vertical'
+            MDLabel:
+                font_style: 'H5'
+                text: 'Welcome to FixRolls!'
+                halign: 'center'
+                theme_text_color: 'Primary'
+                font_size: dp(28)
+            MDLabel:
+                font_style: 'H5'
+                text: 'There you can buy rolls for fixed price'
+                halign: 'center'
+                theme_text_color: 'Primary'
+                font_size: dp(24)
+            
+            BoxLayout:
+                size_hint: None, None
+                size: self.minimum_size
+                spacing: dp(10)
+                orientation: 'vertical'
+                pos_hint: {'center_x': .5}
+                padding: dp(20)
+                MDRaisedButton:
+                    background_color: (0, 0, 0, 1)
+                    # width: 230
+                    pos_hint: {'center_x': .5}
+                    text: "START"
+                    opposite_colors: True
+                    elevation: 10
+                    #font_size: dp(10)
+                    # size_hint: None, None
+                    # size: 200, 40
+                    on_press:
+                        root.manager.transition.direction = 'right'
+                        root.manager.transition.duration = .3
+                        root.manager.current = 'login_screen'
+            Widget:
+
+
+<MainScreen>:
+    id: main_screen
+    toolbar: toolbar
+    total_label: total_label
+    NavigationLayout:
+        id: main_layout
+        MDNavigationDrawer:
+            id: nav_drawer
+            padding: 0, dp(20), 0, dp(20)
+            drawer_logo: 'images/logo-fix-1000.png'
+            pos_hint: {'center_x': .5}
+            NavigationDrawerSubheader:
+                text: "Menu:"
+            NavigationDrawerIconButton:
+                icon: 'checkbox-blank-circle'
+                text: 'Intro Page'
+                on_press:
+                    main_screen.manager.transition.direction = 'left'
+                    main_screen.manager.transition.duration = .3
+                    main_screen.manager.current = 'start_screen'
+            NavigationDrawerIconButton:
+                icon: 'checkbox-blank-circle'
+                text: 'Catalog Page'
+                on_press:
+                    main_screen.manager.transition.direction = 'left'
+                    main_screen.manager.transition.duration = .3
+                    main_screen.manager.current = 'main_screen'
+            NavigationDrawerIconButton:
+                icon: 'checkbox-blank-circle'
+                text: 'Login Page'
+                on_press:
+                    main_screen.manager.transition.direction = 'left'
+                    main_screen.manager.transition.duration = .3
+                    main_screen.manager.current = 'login_screen'
+            NavigationDrawerIconButton:
+                icon: 'checkbox-blank-circle'
+                text: 'Registration Page'
+                on_press:
+                    main_screen.manager.transition.direction = 'left'
+                    main_screen.manager.transition.duration = .3
+                    main_screen.manager.current = 'registration_screen'
+            NavigationDrawerIconButton:
+                icon: 'checkbox-blank-circle'
+                text: 'Checkout Page'
+                on_press:
+                    main_screen.manager.transition.direction = 'left'
+                    main_screen.manager.transition.duration = .3
+                    main_screen.manager.current = 'checkout_screen'
+        Container:
+            id: container
+            orientation:'vertical'
+
+    
+
+            MDToolbar:
+                id: toolbar
+                title: 'FixRolls - Catalog'
+                left_action_items: [['menu', lambda x: main_layout.toggle_nav_drawer()]]
+                right_action_items: [['phone-forward', lambda x: root.toolbar_callback_menu()]]
+                anchor_title: 'left'
+                md_bg_color: app.theme_cls.primary_color
+                background_palette: 'Primary'
+                background_hue: '500'
+                elevation: 8
+
+            MDBottomNavigation:
+
+                MDBottomNavigationItem:
+                    id: tab_catalog
+                    name: 'FixRolls - Catalog'
+                    text: 'Catalog'
+                    icon: 'apps'
+                    on_tab_press:
+                        root.change_toolbar_title(self.name)
+
+
+                    ScrollView:
+                        do_scroll_x: False
+                        canvas.before:
+                            Color:
+                                rgba: 1, 1, 1, 1
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+                        ProductListing:
+                            cols: 2
+                            # row_default_height: (self.width - self.cols*self.spacing[0])/self.cols
+                            row_default_height: dp(250)
+                            row_force_default: True
+                            size_hint_y: None
+                            height: self.minimum_height
+                            padding: dp(0), dp(2)
+                            spacing: dp(6)
+
+                            on_parent:
+                                self.show_products()
+
+                MDBottomNavigationItem:
+                    id: tab_cart
+                    name: 'FixRolls - Cart'
+                    text: 'Cart'
+                    icon: 'cart'
+                    on_tab_press:
+                        root.change_toolbar_title(self.name)
+                        root.show_cart()
+                        root.update_total()
+                        root.update_confirm_button()
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_y: 1
+
+                    
+                        ScrollView:
+                            do_scroll_x: False
+                            canvas.before:
+                                Color:
+                                    rgba: 1, 1, 1, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+                            CartListing:
+
+                                id: cart_listing
+                                cols: 1
+                                row_default_height: dp(150)
+                                row_force_default: True
+                                size_hint_y: None
+                                height: self.minimum_height
+                                padding: dp(0), dp(20)
+                                spacing: dp(10)
+
+                                # on_parent:
+                                #     self.show_cart()
+
+                        BoxLayout:
+                            size_hint_y: .1
+                            orientation: 'vertical'
+                            canvas.before:
+                                Color:
+                                    rgba: 0, 0, 0, .03
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                Widget:
+                                    size_hint_y: .1
+                                BoxLayout:
+                                    orientation: 'vertical'
+                                    MDLabel:
+                                        id: total_label
+                                        size_hint_y: 0.7
+                                        text: 'Total: 500p'
+                                        pos_hint: {'center_x': .5, 'center_y': .5}
+                                    # MDLabel:
+                                    #     id: minimal_order_label
+                                    #     size_hint_y: 0.7
+                                    #     text: 'minimal order: 500p'
+                                    #     font_size: dp(12)
+                                    #     color: 1, 0, 0, 1
+                                    #     pos_hint: {'center_x': .5, 'center_y': .5}
+                                MDRaisedButton:
+                                    id: confirm_button
+                                    size_hint_y: 0.7
+                                    text: 'CONFIRM ORDER'
+                                    pos_hint: {'center_x': .5, 'center_y': .5}
+                                    disabled: False
+                                    on_press:
+                                        main_screen.manager.transition.direction = 'left'
+                                        main_screen.manager.transition.duration = .3
+                                        main_screen.manager.current = 'checkout_screen'
+                                Widget:
+                                    size_hint_y: .1
+
+<CheckOutScreen>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+        BoxLayout:
+            orientation: 'vertical'
+            MDRaisedButton:
+                text: 'CheckOutScreen'
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.transition.duration = .3
+                    root.manager.current = 'main_screen'
+            Widget:
+            MDRaisedButton:
+                text: 'Send Email'
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_press:
+                    app.send_email()
+
+
+
+<LoginFormPage>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        size_hint_x: .9
+        size_hint_y: .4
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        canvas.before:
+            Color:
+                rgba: 0, 0, 0, .03
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 30
+            MDLabel:
+                font_style: 'Body2'
+                theme_text_color: 'Primary'
+                text: "Login form"
+                halign: 'center'
+            MDTextField:
+                hint_text: 'E-mail'
+                required: True
+                helper_text_mode: "on_error"
+                require_text_error: 'Field must be not empty!'
+
+            MDTextField:
+                hint_text: 'Password'
+                required: True
+                helper_text_mode: "on_error"
+                # helper_text: "password must be at least 8 characters"
+                require_text_error: 'Field must be not empty!'
+                password: True
+            BoxLayout:
+                orientation: 'horizontal'
+                AnchorLayout:
+                    anchor_x: 'left'
+                    anchor_y: 'center'
+                    MDTextButton:
+                        text: 'Registrate an account'
+                        on_press:
+                            root.manager.transition.direction = 'left'
+                            root.manager.transition.duration = .3
+                            root.manager.current = 'registration_screen'
+                AnchorLayout:
+                    anchor_x: 'right'
+                    anchor_y: 'center'
+                    MDRaisedButton:
+                        text: 'Login'
+                        pos_hint: {'center_x': 1, 'center_y': .5}
+                        elevation: 10
+                        on_press:
+                            root.manager.transition.direction = 'left'
+                            root.manager.transition.duration = .3
+                            root.manager.current = 'main_screen'
+
+
+<RegistrationFormPage>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        size_hint_x: .9
+        size_hint_y: .5
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        canvas.before:
+            Color:
+                rgba: 0, 0, 0, .03
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 30
+            MDLabel:
+                font_style: 'Body2'
+                theme_text_color: 'Primary'
+                text: "Registration form"
+                halign: 'center'
+            MDTextField:
+                hint_text: 'E-mail'
+                required: True
+                helper_text_mode: "on_error"
+                require_text_error: 'Field must be not empty!'
+
+            MDTextField:
+                hint_text: 'Password'
+                required: True
+                helper_text_mode: "on_focus"
+                helper_text: "password must be at least 8 characters"
+                require_text_error: 'Field must be not empty!'
+                password: True
+
+            MDTextField:
+                hint_text: 'Name'
+                required: False
+
+            MDTextField:
+                hint_text: 'Telephone'
+                input_filter:'int'
+                required: True
+                helper_text_mode: "on_error"
+                require_text_error: 'Field must be not empty!'
+
+            Widget:
+
+            BoxLayout:
+                orientation: 'horizontal'
+                AnchorLayout:
+                    anchor_x: 'left'
+                    anchor_y: 'center'
+                    MDTextButton:
+                        text: 'Login with your account'
+                        on_press:
+                            root.manager.transition.direction = 'left'
+                            root.manager.transition.duration = .3
+                            root.manager.current = 'login_screen'
+                AnchorLayout:
+                    anchor_x: 'right'
+                    anchor_y: 'center'
+                    MDRaisedButton:
+                        text: 'Registrate'
+                        pos_hint: {'center_x': 1, 'center_y': .5}
+                        elevation: 10
+                        on_press:
+                            root.manager.transition.direction = 'left'
+                            root.manager.transition.duration = .3
+                            root.manager.current = 'main_screen'
