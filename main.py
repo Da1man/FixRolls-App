@@ -226,6 +226,8 @@ class ProductListing(GridLayout):
 			on_release=lambda x:ProductListing.add_to_cart(id, image_source, product_title, price)
 			))
 
+		
+
 
 		button_section.add_widget(button1_section)
 		button_section.add_widget(button2_section)
@@ -287,8 +289,10 @@ class MainScreen(Screen):
 
 	toolbar_menu.add_item(
  			"Request a call",
- 			lambda x: MainScreen.toast_message('You sent a request for a call back'),
- 			icon='phone-incoming')	
+ 			# lambda x: MainScreen.toast_message('You sent a request for a call back'),
+ 			# icon='phone-incoming')
+ 			lambda x: Fixrolls2App.callback_request_email('Da1man', '+7 (999) 888-44-22'),
+ 			icon='phone-incoming')
 
 	def show_cart(self):
 		global cart_list
@@ -402,41 +406,7 @@ class Container (BoxLayout):
 		toast(text)
 
 
-class EmailFunctions():
-
 	
-	
-	@staticmethod
-	def send_email():
-
-		addr_from = "dl@rocketstation.ru"                 # Адресат
-		addr_to   = "dl@rocketstation.ru"                   # Получатель
-		password  = "WSFklvhwlgkwq" 						# Пароль
-		
-		
-
-		msg = MIMEMultipart()                               # Создаем сообщение
-		msg['From']    = addr_from                          # Адресат
-		msg['To']      = addr_to                            # Получатель
-		msg['Subject'] = 'Test Kivy Message'                   # Тема сообщения
-		# msg['Date'] = 
-
-
-		body = "Текст сообщения"
-		msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
-
-
-
-		print('connecting to server')
-		smtpObj = smtplib.SMTP_SSL('smtp.yandex.ru', 465)
-		print('connected')
-		print('login to server')
-		smtpObj.login(addr_from,password)
-		print('loged in - OK')
-		print('sending email')
-		smtpObj.sendmail(addr_from,addr_to,msg.as_string())
-		print('email sended - OK')
-		smtpObj.quit()
 
 
 
@@ -445,6 +415,46 @@ class Fixrolls2App(App):
 	theme_cls = ThemeManager()
 	theme_cls.primary_palette = 'Teal'
 	title = "Fixrolls"
+
+	#------EMAIL SETTINGS------
+	addr_from = "dl@rocketstation.ru"
+	addr_to = "dl@rocketstation.ru"
+	host = 'smtp.yandex.ru'
+	port = 465
+	login = "dl@rocketstation.ru"
+	password = "WSFklvhwlgkwq"
+	#------------
+
+	def callback_request_email(user, tel):
+		subject = 'Callback Request'
+		body = 'User ' + user + ' ordered a call back him to ' + tel
+		body += '\n\n------------\n'
+		body += 'this mail from FixRolls Application'
+		Fixrolls2App.send_email(subject, body)
+		
+
+
+	def send_email(subject, email_text):
+
+		msg = MIMEMultipart()
+		msg['From']    = Fixrolls2App.addr_from
+		msg['To']      = Fixrolls2App.addr_to
+		msg['Subject'] = subject
+
+		body = email_text
+		msg.attach(MIMEText(body, 'plain'))
+
+		print('connecting to server')
+		smtpObj = smtplib.SMTP_SSL(Fixrolls2App.host, Fixrolls2App.port)
+		print('connected')
+		print('login to server')
+		smtpObj.login(Fixrolls2App.login,Fixrolls2App.password)
+		print('loged in - OK')
+		print('sending email')
+		smtpObj.sendmail(Fixrolls2App.addr_from,Fixrolls2App.addr_to,msg.as_string())
+		print('email sended - OK')
+		smtpObj.quit()
+		MainScreen.toast_message(subject + 'was sended OK')
 
 	def toast_message(self, text):
 		toast(text)
