@@ -444,17 +444,27 @@ class Fixrolls2App(App):
 		body = email_text
 		msg.attach(MIMEText(body, 'plain'))
 
-		print('connecting to server')
-		smtpObj = smtplib.SMTP_SSL(Fixrolls2App.host, Fixrolls2App.port)
-		print('connected')
-		print('login to server')
-		smtpObj.login(Fixrolls2App.login,Fixrolls2App.password)
-		print('loged in - OK')
-		print('sending email')
-		smtpObj.sendmail(Fixrolls2App.addr_from,Fixrolls2App.addr_to,msg.as_string())
-		print('email sended - OK')
-		smtpObj.quit()
-		MainScreen.toast_message(subject + 'was sended OK')
+		try:
+			print('connecting to server')
+			smtpObj = smtplib.SMTP_SSL(Fixrolls2App.host, Fixrolls2App.port)
+			print('connected')
+		except Exception:
+			MainScreen.toast_message(subject + ' - connecting to server ERROR')
+		else:
+			try:
+				print('login to server')
+				smtpObj.login(Fixrolls2App.login,Fixrolls2App.password)
+				print('loged in - OK')
+				print('sending email')
+				smtpObj.sendmail(Fixrolls2App.addr_from,Fixrolls2App.addr_to,msg.as_string())
+				print('email sended - OK')
+				MainScreen.toast_message(subject + ' - sending OK')
+				
+			except Exception:
+				MainScreen.toast_message(subject + ' - sending ERROR')
+			finally:
+				smtpObj.quit()
+				
 
 	def toast_message(self, text):
 		toast(text)
