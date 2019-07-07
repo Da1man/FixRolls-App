@@ -258,7 +258,7 @@
             MDRaisedButton:
                 text: 'CheckOutScreen'
                 pos_hint: {'center_x': .5, 'center_y': .5}
-                on_press:
+                on_release:
                     root.manager.transition.direction = 'left'
                     root.manager.transition.duration = .3
                     root.manager.current = 'main_screen'
@@ -266,7 +266,7 @@
             MDRaisedButton:
                 text: 'Send Email'
                 pos_hint: {'center_x': .5, 'center_y': .5}
-                on_press:
+                on_release:
                     app.callback_request_email('Da1man', '+7 (999) 888-44-22')
 
 
@@ -297,12 +297,16 @@
                 text: "Login form"
                 halign: 'center'
             MDTextField:
+                id:login_email
+                text: ''
                 hint_text: 'E-mail'
                 required: True
                 helper_text_mode: "on_error"
                 require_text_error: 'Field must be not empty!'
 
             MDTextField:
+                id:login_password
+                text: ''
                 hint_text: 'Password'
                 required: True
                 helper_text_mode: "on_error"
@@ -327,11 +331,17 @@
                         text: 'Login'
                         pos_hint: {'center_x': 1, 'center_y': .5}
                         elevation: 10
-                        on_press:
-                            root.manager.transition.direction = 'left'
-                            root.manager.transition.duration = .3
-                            root.manager.current = 'main_screen'
-
+                        on_release:
+                            app.login_user(root.ids.login_email.text, root.ids.login_password.text)
+            AnchorLayout:
+                anchor_x: 'center'
+                anchor_y: 'center'
+                MDTextButton:
+                    text: 'Catalog page'
+                    on_press:
+                        root.manager.transition.direction = 'left'
+                        root.manager.transition.duration = .3
+                        root.manager.current = 'main_screen'
 
 <RegistrationFormPage>:
     canvas.before:
@@ -359,12 +369,14 @@
                 text: "Registration form"
                 halign: 'center'
             MDTextField:
+                id: reg_email
                 hint_text: 'E-mail'
                 required: True
                 helper_text_mode: "on_error"
                 require_text_error: 'Field must be not empty!'
 
             MDTextField:
+                id: reg_password
                 hint_text: 'Password'
                 required: True
                 helper_text_mode: "on_focus"
@@ -373,17 +385,23 @@
                 password: True
 
             MDTextField:
+                id: reg_name
                 hint_text: 'Name'
                 required: False
+                required: True
+                helper_text_mode: "on_error"
+                require_text_error: 'Field must be not empty!'
 
             MDTextField:
-                hint_text: 'Telephone'
+                id: reg_phone
+                hint_text: 'Phone'
                 input_filter:'int'
                 required: True
                 helper_text_mode: "on_error"
                 require_text_error: 'Field must be not empty!'
 
             Widget:
+                size_hint_y: .5
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -403,7 +421,14 @@
                         text: 'Registrate'
                         pos_hint: {'center_x': 1, 'center_y': .5}
                         elevation: 10
-                        on_press:
-                            root.manager.transition.direction = 'left'
-                            root.manager.transition.duration = .3
-                            root.manager.current = 'main_screen'
+                        on_release:
+                            app.reg_user(root.ids.reg_email.text, root.ids.reg_password.text, root.ids.reg_name.text, root.ids.reg_phone.text)
+            AnchorLayout:
+                anchor_x: 'center'
+                anchor_y: 'center'
+                MDTextButton:
+                    text: 'Catalog page'
+                    on_press:
+                        root.manager.transition.direction = 'left'
+                        root.manager.transition.duration = .3
+                        root.manager.current = 'main_screen'

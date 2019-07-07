@@ -27,47 +27,47 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import sqlite3
 
+#TODO LIST:
+'''
+1. Вызов функции звонка по вызову Call to us в тулбар меню
+Done. 2. Подключение базы данных проекта
+2.1 Подключение удаленной базы проекта
+Done. 3. Регистрация пользователя
+Done. 4. Авторизация пользователя
+5. Сохранение заказа пользователя в БД
+6. Генерация уникального ID заказа в БД
+7. Отправка письма заказа на почту
+8. Всплывашка подсказки минимального заказа
+9. Личные данные пользователя в боковом меню
+Done. 10. Вывод товаров из базы данных
+'''
 
-product_list =[{'id': 77,
-					'title': 'Chicken Mango Roll',
-					'img': 'images/CHiken-Mango-Roll.jpg',
-					'price': 999,},
-					{'id': 16,
-					'title': 'Chirashi Mix Roll',
-					'img': 'images/CHirashi-MIX.jpg',
-					'price': 125,},
-					{'id': 22,
-					'title': 'California Black Roll',
-					'img': 'images/Kaliforniya-Blek.jpg',
-					'price': 150,},
-					{'id': 35,
-					'title': 'California Hot Roll',
-					'img': 'images/Kaliforniya-Hot.jpg',
-					'price': 100,},
-					{'id': 4,
-					'title': 'Mix Lava Roll',
-					'img': 'images/MIX-Lava-roll.jpg',
-					'price': 100,},
-					{'id': 5,
-					'title': 'Philadelphia Lite',
-					'img': 'images/Filadelfiya-LITE.jpg',
-					'price': 100,},
-					{'id': 6,
-					'title': 'Philadelphia Mix',
-					'img': 'images/Filadelfiya-MIX.jpg',
-					'price': 100,},
-					{'id': 7,
-					'title': 'Tomago Lava Roll',
-					'img': 'images/Tomago-Lava-Roll.jpg',
-					'price': 100,},
-					{'id': 99,
-					'title': 'Yasai Cheeze Roll',
-					'img': 'images/YAsaj-CHiz-Roll.jpg',
-					'price': 100,}
-					]
-
+product_list = []
 cart_list = []
+
+
+
+# Import products start
+print('Import products from database...')
+
+print('connecting to database')
+connect = sqlite3.connect('fixrolls.db')
+cursor = connect.cursor()
+print('connected')
+sql = "SELECT * FROM products"
+cursor.execute(sql)
+
+for product_db in cursor.fetchall():
+	product_list.append({'id': product_db[0],
+							'title': product_db[1],
+							'price': product_db[2],
+							'img': 'images/' + product_db[3]})
+	print ('Product ', product_db, ' add to list')
+
+#Import products end
+
 
 class CartListing(GridLayout):
 	
@@ -412,6 +412,8 @@ class Container (BoxLayout):
 
 class Fixrolls2App(App):
 
+	current_user_id = None
+
 	theme_cls = ThemeManager()
 	theme_cls.primary_palette = 'Teal'
 	title = "Fixrolls"
@@ -424,6 +426,62 @@ class Fixrolls2App(App):
 	login = "dl@rocketstation.ru"
 	password = "WSFklvhwlgkwq"
 	#------------
+
+	def login_user(self, email, password):
+		# print('input data: ', + login + ', ' + password)
+		print('connecting to database')
+		connect = sqlite3.connect('fixrolls.db')
+		cursor = connect.cursor()
+		print('connected')
+		sql = "SELECT * FROM users WHERE email=?"
+		founded_user = cursor.execute(sql, [email]).fetchone()
+		if founded_user == None:
+			MainScreen.toast_message('ERROR! User ' + email + ' not registred')
+		else:
+			if (email == founded_user[1]) and (password == founded_user[2]):
+				MainScreen.toast_message('SUCCES! User ' + email + ' log in')
+				# LoginFormPage.manager(current = 'main_screen')
+				# print(LoginFormPage.manager)
+				Fixrolls2App.current_user_id = founded_user[0]
+				print('Now user id is: ' + str(Fixrolls2App.current_user_id))
+			else:
+				MainScreen.toast_message('ERROR! Wrong password')
+
+
+
+	def reg_user(self, email, password, name, phone):
+		if email== '' or password== '' or name== '' or phone== '':
+			MainScreen.toast_message('ERROR! Please, input all fields')
+		else:
+			print('connecting to database')
+			connect = sqlite3.connect('fixrolls.db')
+			cursor = connect.cursor()
+			print('connected')
+			user = (email, password, name, phone)
+			sql = "SELECT * FROM users WHERE email=?"
+			founded_user = cursor.execute(sql, [email]).fetchone()
+			if founded_user != None:
+				MainScreen.toast_message('ERROR! Username is already taken')
+			else:
+				sql = """ INSERT INTO users (email, password, name, phone)
+				VALUES (?, ?, ?, ?)
+				"""
+				cursor.execute(sql, user)
+				connect.commit()
+				print('User created')
+				MainScreen.toast_message('SUCCESS! User '  + email + ' was created')
+				sql = "SELECT * FROM users WHERE email=?"
+				founded_user = cursor.execute(sql, [email]).fetchone()
+				Fixrolls2App.current_user_id = founded_user[0]
+				print('Now user id is: ' + str(Fixrolls2App.current_user_id))
+		
+		# sql = """
+
+		# """
+		# cursor.execute(sql)
+		# print('saving data...')
+		# connect.commit()
+
 
 	def callback_request_email(user, tel):
 		subject = 'Callback Request'
