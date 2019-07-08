@@ -81,6 +81,15 @@
             drawer_logo: 'images/logo-fix-1000.png'
             pos_hint: {'center_x': .5}
             NavigationDrawerSubheader:
+                text: "Profile:"
+            NavigationDrawerIconButton:
+                icon: 'account'
+                text: 'Edit profile'
+            NavigationDrawerIconButton:
+                icon: 'cart-outline'
+                text: 'orders'
+                
+            NavigationDrawerSubheader:
                 text: "Menu:"
             NavigationDrawerIconButton:
                 icon: 'checkbox-blank-circle'
@@ -230,7 +239,7 @@
                                     #     font_size: dp(12)
                                     #     color: 1, 0, 0, 1
                                     #     pos_hint: {'center_x': .5, 'center_y': .5}
-                                MDRaisedButton:
+                                ConfirmButton:
                                     id: confirm_button
                                     size_hint_y: 0.7
                                     text: 'CONFIRM ORDER'

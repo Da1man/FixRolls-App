@@ -21,6 +21,7 @@ from kivy.core.window import Window
 
 from kivymd.bottomsheet import MDListBottomSheet
 from kivymd.toast.kivytoast import toast
+from kivymd.snackbars import Snackbar
 
 
 import smtplib
@@ -28,6 +29,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import sqlite3
+
+screen_manager = None
+total_in_cart = 0
 
 #TODO LIST:
 '''
@@ -37,11 +41,12 @@ Done. 2. Подключение базы данных проекта
 Done. 3. Регистрация пользователя
 Done. 4. Авторизация пользователя
 5. Сохранение заказа пользователя в БД
-6. Генерация уникального ID заказа в БД
+6. Открытие окна каталога при логине
 7. Отправка письма заказа на почту
-8. Всплывашка подсказки минимального заказа
+Done. 8. Всплывашка подсказки минимального заказа
 9. Личные данные пользователя в боковом меню
 Done. 10. Вывод товаров из базы данных
+11. Страница с личными данными пользователя
 '''
 
 product_list = []
@@ -75,12 +80,20 @@ class CartListing(GridLayout):
 		
 
 class ProductImage(AsyncImage):
-	price = 1000
 
 	def on_touch_down(self, touch):
 		if self.collide_point(*touch.pos):
 			print (self.id, self.source, self.title, self.price)
 			ProductListing.open_popup(self.title, self.source, self.id, self.price)
+
+class ConfirmButton(MDRaisedButton):
+	global total_in_cart
+	def on_touch_down(self, touch):
+		if self.collide_point(*touch.pos):
+			if total_in_cart <= 500:
+				MainScreen.show_snackbar(self, "Minimum total price of your order is 500p")
+			else:
+				screen_manager.current = 'checkout_screen'
 
 class ProductListing(GridLayout):
 	global product_list
@@ -272,6 +285,9 @@ class MainScreen(Screen):
 	toolbar_menu = ObjectProperty()
 	toolbar_menu = MDListBottomSheet()
 
+	def show_snackbar(self, text):
+		Snackbar(text= text).show()
+
 
 	def change_toolbar_title(self, toolbar_name):
 		self.toolbar.title = toolbar_name
@@ -360,12 +376,14 @@ class MainScreen(Screen):
 
 
 	def update_total(self):
+		global total_in_cart
 		total_label = ObjectProperty()
 		total = 0
 		for product in cart_list:
 			total += product['price']
 		self.total_label.text = 'Total: ' + str(total)
 		#print('Total=' + str(total))
+		total_in_cart = total
 		return total
 
 	def search_index_by_id_in_cart(self, id):
@@ -411,7 +429,7 @@ class Container (BoxLayout):
 
 
 class Fixrolls2App(App):
-
+	global screen_manager
 	current_user_id = None
 
 	theme_cls = ThemeManager()
@@ -440,8 +458,7 @@ class Fixrolls2App(App):
 		else:
 			if (email == founded_user[1]) and (password == founded_user[2]):
 				MainScreen.toast_message('SUCCES! User ' + email + ' log in')
-				# LoginFormPage.manager(current = 'main_screen')
-				# print(LoginFormPage.manager)
+				screen_manager.current = 'main_screen'
 				Fixrolls2App.current_user_id = founded_user[0]
 				print('Now user id is: ' + str(Fixrolls2App.current_user_id))
 			else:
@@ -450,7 +467,7 @@ class Fixrolls2App(App):
 
 
 	def reg_user(self, email, password, name, phone):
-		if email== '' or password== '' or name== '' or phone== '':
+		if email=='' or password=='' or name=='' or phone=='':
 			MainScreen.toast_message('ERROR! Please, input all fields')
 		else:
 			print('connecting to database')
@@ -474,7 +491,8 @@ class Fixrolls2App(App):
 				founded_user = cursor.execute(sql, [email]).fetchone()
 				Fixrolls2App.current_user_id = founded_user[0]
 				print('Now user id is: ' + str(Fixrolls2App.current_user_id))
-		
+				screen_manager.current = 'main_screen'
+
 		# sql = """
 
 		# """
@@ -528,8 +546,8 @@ class Fixrolls2App(App):
 		toast(text)
 
 	def build(self):
-
-		screen_manager = ScreenManager(transition=WipeTransition())
+		global screen_manager
+		screen_manager = ScreenManager(id='screenmanager', transition=WipeTransition())
 		screen_manager.add_widget(StartScreen(name="start_screen"))
 		screen_manager.add_widget(MainScreen(name="main_screen"))
 		screen_manager.add_widget(CheckOutScreen(name="checkout_screen"))
