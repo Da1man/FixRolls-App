@@ -91,7 +91,7 @@ class ConfirmButton(MDRaisedButton):
 	def on_touch_down(self, touch):
 		if self.collide_point(*touch.pos):
 			if total_in_cart <= 500:
-				MainScreen.show_snackbar(self, "Minimum total price of your order is 500p")
+				MainScreen.show_snackbar(self, "The minimal total price of your order is 500p")
 			else:
 				screen_manager.current = 'checkout_screen'
 
